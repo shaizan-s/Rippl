@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
+import 'package:flutter/material.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+
 class Beach {
   final String name;
   final LatLng position;
@@ -17,6 +20,7 @@ class BeachMap extends StatefulWidget {
 class _BeachMapState extends State<BeachMap> {
   GoogleMapController? _mapController;
   Set<Marker> _markers = Set<Marker>();
+  MarkerId? _selectedMarkerId;
   final LatLngBounds _indiaBounds = LatLngBounds(
     southwest: LatLng(6.4622, 68.1100),
     northeast: LatLng(37.1044, 97.2394),
@@ -24,6 +28,7 @@ class _BeachMapState extends State<BeachMap> {
 
   final LatLng _initialPosition = LatLng(20.5937, 78.9629); // Center of India
   final TextEditingController _searchController = TextEditingController();
+  final FocusNode _searchFocusNode = FocusNode(); // Define FocusNode
   bool _isSearching = false;
   List<Beach> _filteredBeaches = [];
 
@@ -204,28 +209,139 @@ class _BeachMapState extends State<BeachMap> {
           Marker(
             markerId: MarkerId(beach.name),
             position: beach.position,
+            icon: _selectedMarkerId == MarkerId(beach.name)
+                ? BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed)
+                : BitmapDescriptor.defaultMarker,
             infoWindow: InfoWindow(
               title: beach.name,
               snippet: beach.snippet,
             ),
+            onTap: () {
+              _onMarkerTapped(beach);
+            },
           ),
         );
       }
     });
   }
 
+  void _onMarkerTapped(Beach beach) {
+    setState(() {
+      _selectedMarkerId = MarkerId(beach.name);
+      _addMarkers(); // Rebuild markers to apply color changes
+      _mapController?.animateCamera(
+        CameraUpdate.newLatLngZoom(beach.position, 12.0),
+      );
+    });
+  }
+
   void _onMapCreated(GoogleMapController controller) {
     _mapController = controller;
+
+    // Esri Light Gray Canvas style JSON
+    final String esriLightGrayCanvasStyle = '''
+  [
+    {
+      "elementType": "geometry",
+      "stylers": [
+        {
+          "color": "#eeeeee"
+        }
+      ]
+    },
+    {
+      "elementType": "labels.icon",
+      "stylers": [
+        {
+          "visibility": "off"
+        }
+      ]
+    },
+    {
+      "elementType": "labels.text.fill",
+      "stylers": [
+        {
+          "color": "#666666"
+        }
+      ]
+    },
+    {
+      "elementType": "labels.text.stroke",
+      "stylers": [
+        {
+          "color": "#ffffff"
+        }
+      ]
+    },
+    {
+      "featureType": "administrative",
+      "elementType": "geometry.stroke",
+      "stylers": [
+        {
+          "color": "#c3c3c3"
+        }
+      ]
+    },
+    {
+      "featureType": "landscape",
+      "elementType": "geometry",
+      "stylers": [
+        {
+          "color": "#f5f5f5"
+        }
+      ]
+    },
+    {
+      "featureType": "poi",
+      "elementType": "geometry",
+      "stylers": [
+        {
+          "color": "#eeeeee"
+        }
+      ]
+    },
+    {
+      "featureType": "road",
+      "elementType": "geometry",
+      "stylers": [
+        {
+          "color": "#ffffff"
+        }
+      ]
+    },
+    {
+      "featureType": "road",
+      "elementType": "labels.text.fill",
+      "stylers": [
+        {
+          "color": "#666666"
+        }
+      ]
+    },
+    {
+      "featureType": "water",
+      "elementType": "geometry",
+      "stylers": [
+        {
+          "color": "#c6e2ff"
+        }
+      ]
+    }
+  ]
+  ''';
+
+    _mapController?.setMapStyle(esriLightGrayCanvasStyle);
+
     _mapController?.animateCamera(
-        CameraUpdate.newLatLngBounds(_indiaBounds, 10));
+      CameraUpdate.newLatLngBounds(_indiaBounds, 10),
+    );
   }
 
   void _onSearchPressed() {
     setState(() {
       _isSearching = !_isSearching;
       if (_isSearching) {
-        FocusScope.of(context).requestFocus(
-            FocusNode()); // Open the keyboard when search is pressed
+        _searchFocusNode.requestFocus(); // Request focus to keep the keyboard open
       }
     });
   }
@@ -310,6 +426,7 @@ class _BeachMapState extends State<BeachMap> {
                               padding: const EdgeInsets.symmetric(horizontal: 8.0),
                               child: TextField(
                                 controller: _searchController,
+                                focusNode: _searchFocusNode, // Attach FocusNode
                                 onChanged: (value) {
                                   if (value.isNotEmpty) {
                                     _searchBeaches(value);
@@ -351,6 +468,10 @@ class _BeachMapState extends State<BeachMap> {
                                 title: Text(
                                   beach.name,
                                   style: TextStyle(color: Colors.white),
+                                ),
+                                subtitle: Text(
+                                  beach.snippet,
+                                  style: TextStyle(color: Colors.white70, fontSize: 12),
                                 ),
                                 onTap: () {
                                   _mapController?.animateCamera(

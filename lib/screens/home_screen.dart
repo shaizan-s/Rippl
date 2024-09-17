@@ -1,242 +1,377 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
-class HomeScreen extends StatefulWidget {
-  @override
-  _HomeScreenState createState() => _HomeScreenState();
+class Beach {
+  final String name;
+  final LatLng position;
+  final String snippet;
+
+  Beach({required this.name, required this.position, required this.snippet});
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class BeachMap extends StatefulWidget {
+  @override
+  _BeachMapState createState() => _BeachMapState();
+}
+
+class _BeachMapState extends State<BeachMap> {
   GoogleMapController? _mapController;
-  Set<Marker> _markers = {};
-  Set<Polyline> _polylines = {};
-  List<String> _beaches = [
-    'Puri Beach', 'Pati Sonepur Sea Beach', 'Rushikonda Beach', 'Kovalam Beach',
-    'Eden Beach', 'Radhanagar Beach', 'Minicoy Thundi Beach', 'Kadmat Beach',
-    'Kappad Beach', 'Kasarkod Beach', 'Padubidri Beach', 'Ghoghla Beach',
-    'Shivrajpur Beach',
-  ];
-  List<String> _searchResults = [];
-  String? _selectedBeach; // Stores the selected beach from the dropdown
+  Set<Marker> _markers = Set<Marker>();
+  final LatLngBounds _indiaBounds = LatLngBounds(
+    southwest: LatLng(6.4622, 68.1100),
+    northeast: LatLng(37.1044, 97.2394),
+  );
 
   final LatLng _initialPosition = LatLng(20.5937, 78.9629); // Center of India
-  final LatLngBounds _indiaBounds = LatLngBounds(
-    southwest: LatLng(6.4626, 68.1758),
-    northeast: LatLng(37.0625, 97.3963),
-  );
+  final TextEditingController _searchController = TextEditingController();
+  bool _isSearching = false;
+  List<Beach> _filteredBeaches = [];
+
+
+  // List of beaches
+  final List<Beach> beaches = [
+    // Andhra Pradesh beaches
+    Beach(name: 'Rushikonda Beach',
+        position: LatLng(17.7833, 83.3883),
+        snippet: 'Andhra Pradesh'),
+    Beach(name: 'Bheemunipatnam Beach',
+        position: LatLng(17.8924, 83.4520),
+        snippet: 'Andhra Pradesh'),
+    Beach(name: 'Manginapudi Beach',
+        position: LatLng(16.1782, 81.1391),
+        snippet: 'Andhra Pradesh'),
+    Beach(name: 'Mypad Beach',
+        position: LatLng(14.3623, 80.1417),
+        snippet: 'Andhra Pradesh'),
+    Beach(name: 'Vodarevu Beach',
+        position: LatLng(15.8357, 80.3512),
+        snippet: 'Andhra Pradesh'),
+
+    // Goa beaches
+    Beach(name: 'Colva Beach',
+        position: LatLng(15.2793, 73.9220),
+        snippet: 'Goa'),
+    Beach(name: 'Dona Paula Beach',
+        position: LatLng(15.4667, 73.8333),
+        snippet: 'Goa'),
+    Beach(name: 'Anjuna Beach',
+        position: LatLng(15.5819, 73.7432),
+        snippet: 'Goa'),
+    Beach(name: 'Arambol Beach',
+        position: LatLng(15.6869, 73.7046),
+        snippet: 'Goa'),
+
+    // Gujarat beaches
+    Beach(name: 'Porbandar Beach',
+        position: LatLng(21.6421, 69.6293),
+        snippet: 'Gujarat'),
+    Beach(name: 'Mandvi Beach',
+        position: LatLng(22.8327, 69.3460),
+        snippet: 'Gujarat'),
+    Beach(name: 'Somnath Beach',
+        position: LatLng(20.8880, 70.4017),
+        snippet: 'Gujarat'),
+    Beach(name: 'Chorwad Beach',
+        position: LatLng(21.0169, 70.2166),
+        snippet: 'Gujarat'),
+
+    // Karnataka beaches
+    Beach(name: 'Om Beach',
+        position: LatLng(14.5195, 74.3186),
+        snippet: 'Karnataka'),
+    Beach(name: 'Malpe Beach',
+        position: LatLng(13.3522, 74.6869),
+        snippet: 'Karnataka'),
+    Beach(name: 'Karwar Beach',
+        position: LatLng(14.8027, 74.1240),
+        snippet: 'Karnataka'),
+    Beach(name: 'Kudle Beach',
+        position: LatLng(14.5227, 74.3194),
+        snippet: 'Karnataka'),
+
+    // Kerala beaches
+    Beach(name: 'Varkala Beach',
+        position: LatLng(8.7379, 76.7024),
+        snippet: 'Kerala'),
+    Beach(name: 'Alleppey Beach',
+        position: LatLng(9.4906, 76.3264),
+        snippet: 'Kerala'),
+    Beach(name: 'Kovalam Beach',
+        position: LatLng(8.4033, 76.9763),
+        snippet: 'Kerala'),
+    Beach(name: 'Bekal Beach',
+        position: LatLng(12.3666, 75.0419),
+        snippet: 'Kerala'),
+
+    // Lakshadweep beaches
+    Beach(name: 'Kavaratti Beach',
+        position: LatLng(10.5667, 72.6369),
+        snippet: 'Lakshadweep'),
+    Beach(name: 'Minicoy Beach',
+        position: LatLng(8.2955, 73.0464),
+        snippet: 'Lakshadweep'),
+    Beach(name: 'Kadmat Beach',
+        position: LatLng(11.2196, 72.7762),
+        snippet: 'Lakshadweep'),
+    Beach(name: 'Bangaram Beach',
+        position: LatLng(10.9462, 72.2875),
+        snippet: 'Lakshadweep'),
+
+    // Maharashtra beaches
+    Beach(name: 'Juhu Beach',
+        position: LatLng(19.0988, 72.8267),
+        snippet: 'Maharashtra'),
+    Beach(name: 'Alibag Beach',
+        position: LatLng(18.6424, 72.8757),
+        snippet: 'Maharashtra'),
+    Beach(name: 'Ganpatipule Beach',
+        position: LatLng(17.1422, 73.2606),
+        snippet: 'Maharashtra'),
+
+    // Odisha beaches
+    Beach(name: 'Puri Beach',
+        position: LatLng(19.8035, 85.8245),
+        snippet: 'Odisha'),
+    Beach(name: 'Chandipur Beach',
+        position: LatLng(21.4710, 87.0129),
+        snippet: 'Odisha'),
+    Beach(name: 'Gopalpur Beach',
+        position: LatLng(19.2800, 84.8975),
+        snippet: 'Odisha'),
+    Beach(name: 'Khurda Beach',
+        position: LatLng(20.2798, 85.8254),
+        snippet: 'Odisha'),
+
+    // Tamil Nadu beaches
+    Beach(name: 'Marina Beach',
+        position: LatLng(13.0477, 80.2630),
+        snippet: 'Tamil Nadu'),
+    Beach(name: 'Kovalam Beach',
+        position: LatLng(8.4033, 76.9763),
+        snippet: 'Tamil Nadu'),
+    Beach(name: 'Mahabalipuram Beach',
+        position: LatLng(12.6200, 80.1553),
+        snippet: 'Tamil Nadu'),
+    Beach(name: 'ECR Beach',
+        position: LatLng(12.9352, 80.2155),
+        snippet: 'Tamil Nadu'),
+
+    // West Bengal beaches
+    Beach(name: 'Digha Beach',
+        position: LatLng(21.6281, 87.5101),
+        snippet: 'West Bengal'),
+    Beach(name: 'Shankarpur Beach',
+        position: LatLng(21.6350, 87.4488),
+        snippet: 'West Bengal'),
+    Beach(name: 'Frazerganj Beach',
+        position: LatLng(21.6719, 87.5540),
+        snippet: 'West Bengal'),
+    Beach(name: 'Ganga Sagar Beach',
+        position: LatLng(21.6470, 88.8490),
+        snippet: 'West Bengal'),
+
+    // Daman beaches
+    Beach(name: 'Devka Beach',
+        position: LatLng(20.4111, 72.8281),
+        snippet: 'Daman'),
+    Beach(name: 'Jaypore Beach',
+        position: LatLng(20.3823, 72.8461),
+        snippet: 'Daman'),
+
+    // Diu beaches
+    Beach(name: 'Jallandhar Beach',
+        position: LatLng(20.7130, 70.9570),
+        snippet: 'Diu'),
+    Beach(name: 'Chakratith Beach',
+        position: LatLng(20.7136, 70.9638),
+        snippet: 'Diu'),
+    Beach(name: 'Nagoa Beach',
+        position: LatLng(20.7135, 70.9475),
+        snippet: 'Diu'),
+  ];
 
   @override
   void initState() {
     super.initState();
-    _setMarkers();
-    _addIndiaBorderPolyline();
+    _addMarkers();
   }
 
-  void _setMarkers() {
+  void _addMarkers() {
     setState(() {
-      _markers.addAll([
-        Marker(
-          markerId: MarkerId('puri_beach'),
-          position: LatLng(19.8030, 85.8252), // Puri Beach
-          infoWindow: InfoWindow(title: 'Puri Beach'),
-        ),
-        Marker(
-          markerId: MarkerId('pati_sonepur'),
-          position: LatLng(19.1803, 84.7635), // Pati Sonepur Beach
-          infoWindow: InfoWindow(title: 'Pati Sonepur Sea Beach'),
-        ),
-        Marker(
-          markerId: MarkerId('rushikonda_beach'),
-          position: LatLng(17.7826, 83.3955), // Rushikonda Beach
-          infoWindow: InfoWindow(title: 'Rushikonda Beach'),
-        ),
-        Marker(
-          markerId: MarkerId('kovalam_beach'),
-          position: LatLng(12.7916, 80.2572), // Kovalam Beach
-          infoWindow: InfoWindow(title: 'Kovalam Beach'),
-        ),
-        Marker(
-          markerId: MarkerId('eden_beach'),
-          position: LatLng(11.8895, 79.8141), // Eden Beach
-          infoWindow: InfoWindow(title: 'Eden Beach'),
-        ),
-        Marker(
-          markerId: MarkerId('radhanagar_beach'),
-          position: LatLng(11.9673, 92.9873), // Radhanagar Beach
-          infoWindow: InfoWindow(title: 'Radhanagar Beach'),
-        ),
-        Marker(
-          markerId: MarkerId('minicoy_thundi'),
-          position: LatLng(8.2876, 73.0487), // Minicoy Thundi Beach
-          infoWindow: InfoWindow(title: 'Minicoy Thundi Beach'),
-        ),
-        Marker(
-          markerId: MarkerId('kadmat_beach'),
-          position: LatLng(11.2191, 72.7796), // Kadmat Beach
-          infoWindow: InfoWindow(title: 'Kadmat Beach'),
-        ),
-        Marker(
-          markerId: MarkerId('kappad_beach'),
-          position: LatLng(11.3656, 75.7083), // Kappad Beach
-          infoWindow: InfoWindow(title: 'Kappad Beach'),
-        ),
-        Marker(
-          markerId: MarkerId('kasarkod_beach'),
-          position: LatLng(14.3667, 74.4403), // Kasarkod Beach
-          infoWindow: InfoWindow(title: 'Kasarkod Beach'),
-        ),
-        Marker(
-          markerId: MarkerId('padubidri_beach'),
-          position: LatLng(13.1242, 74.7860), // Padubidri Beach
-          infoWindow: InfoWindow(title: 'Padubidri Beach'),
-        ),
-        Marker(
-          markerId: MarkerId('ghoghla_beach'),
-          position: LatLng(20.7055, 70.9897), // Ghoghla Beach
-          infoWindow: InfoWindow(title: 'Ghoghla Beach'),
-        ),
-        Marker(
-          markerId: MarkerId('shivrajpur_beach'),
-          position: LatLng(22.3683, 68.9677), // Shivrajpur Beach
-          infoWindow: InfoWindow(title: 'Shivrajpur Beach'),
-        ),
-      ]);
-    });
-  }
-
-  void _addIndiaBorderPolyline() {
-    List<LatLng> indiaBorderCoordinates = [
-      LatLng(35.5087, 77.8374), // Example: Northernmost part
-      LatLng(31.1857, 74.3587), // Add more coordinates for accuracy
-      LatLng(22.5726, 88.3639),
-      LatLng(8.0883, 77.5385),
-      // Add more points to cover the entire border
-    ];
-
-    setState(() {
-      _polylines.add(
-        Polyline(
-          polylineId: PolylineId('india_border'),
-          points: indiaBorderCoordinates,
-          color: Colors.black, // Black color for border
-          width: 5, // Bold border
-        ),
-      );
-    });
-  }
-
-  void _onSearchChanged(String query) {
-    setState(() {
-      _searchResults = _beaches
-          .where((beach) => beach.toLowerCase().contains(query.toLowerCase()))
-          .toList();
-      _searchResults.sort(); // Sort alphabetically based on typed input
-    });
-  }
-
-  void _onSearchSelected(String beach) {
-    LatLng selectedBeachPosition;
-
-    switch (beach) {
-      case 'Puri Beach':
-        selectedBeachPosition = LatLng(19.8030, 85.8252);
-        break;
-      case 'Pati Sonepur Sea Beach':
-        selectedBeachPosition = LatLng(19.1803, 84.7635);
-        break;
-      case 'Rushikonda Beach':
-        selectedBeachPosition = LatLng(17.7826, 83.3955);
-        break;
-      case 'Kovalam Beach':
-        selectedBeachPosition = LatLng(12.7916, 80.2572);
-        break;
-      case 'Eden Beach':
-        selectedBeachPosition = LatLng(11.8895, 79.8141);
-        break;
-      case 'Radhanagar Beach':
-        selectedBeachPosition = LatLng(11.9673, 92.9873);
-        break;
-      case 'Minicoy Thundi Beach':
-        selectedBeachPosition = LatLng(8.2876, 73.0487);
-        break;
-      case 'Kadmat Beach':
-        selectedBeachPosition = LatLng(11.2191, 72.7796);
-        break;
-      case 'Kappad Beach':
-        selectedBeachPosition = LatLng(11.3656, 75.7083);
-        break;
-      case 'Kasarkod Beach':
-        selectedBeachPosition = LatLng(14.3667, 74.4403);
-        break;
-      case 'Padubidri Beach':
-        selectedBeachPosition = LatLng(13.1242, 74.7860);
-        break;
-      case 'Ghoghla Beach':
-        selectedBeachPosition = LatLng(20.7055, 70.9897);
-        break;
-      case 'Shivrajpur Beach':
-        selectedBeachPosition = LatLng(22.3683, 68.9677);
-        break;
-      default:
-        return;
-    }
-
-    _mapController?.animateCamera(CameraUpdate.newLatLngZoom(selectedBeachPosition, 12.0));
-    setState(() {
-      _searchResults.clear();
+      _markers.clear();
+      for (var beach in beaches) {
+        _markers.add(
+          Marker(
+            markerId: MarkerId(beach.name),
+            position: beach.position,
+            infoWindow: InfoWindow(
+              title: beach.name,
+              snippet: beach.snippet,
+            ),
+          ),
+        );
+      }
     });
   }
 
   void _onMapCreated(GoogleMapController controller) {
     _mapController = controller;
-    _mapController?.animateCamera(CameraUpdate.newLatLngBounds(_indiaBounds, 10));
+    _mapController?.animateCamera(
+        CameraUpdate.newLatLngBounds(_indiaBounds, 10));
+  }
+
+  void _onSearchPressed() {
+    setState(() {
+      _isSearching = !_isSearching;
+      if (_isSearching) {
+        FocusScope.of(context).requestFocus(
+            FocusNode()); // Open the keyboard when search is pressed
+      }
+    });
+  }
+
+  void _searchBeaches(String query) {
+    final lowerCaseQuery = query.toLowerCase();
+    setState(() {
+      _filteredBeaches = beaches.where((beach) {
+        return beach.name.toLowerCase().contains(lowerCaseQuery);
+      }).toList();
+    });
+  }
+
+  void _showBeachNotFoundDialog() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('No Results Found'),
+          content: Text('No beaches match the search query.'),
+          actions: [
+            TextButton(
+              child: Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _hideKeyboard() {
+    FocusScope.of(context).unfocus(); // Hide the keyboard
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.blueAccent,
-        automaticallyImplyLeading: false,
-        title: Column(
-          children: [
-            TextField(
-              decoration: InputDecoration(
-                hintText: 'Search Beaches/Coastal Areas',
-                border: InputBorder.none,
-              ),
-              onChanged: _onSearchChanged,
+      body: Stack(
+        children: [
+          GoogleMap(
+            onMapCreated: _onMapCreated,
+            initialCameraPosition: CameraPosition(
+              target: _initialPosition,
+              zoom: 5.0,
             ),
-            if (_searchResults.isNotEmpty)
-              DropdownButton<String>(
-                value: _selectedBeach,
-                hint: Text('Select a Beach'),
-                items: _searchResults
-                    .map((beach) => DropdownMenuItem<String>(
-                  value: beach,
-                  child: Text(beach),
-                ))
-                    .toList(),
-                onChanged: (value) {
-                  setState(() {
-                    _selectedBeach = value;
-                  });
-                  if (value != null) {
-                    _onSearchSelected(value);
-                  }
-                },
-              ),
-          ],
-        ),
-      ),
-      body: GoogleMap(
-        onMapCreated: _onMapCreated,
-        initialCameraPosition: CameraPosition(
-          target: _initialPosition,
-          zoom: 5.0,
-        ),
-        markers: _markers,
-        polylines: _polylines, // Add the India border Polyline
+            markers: _markers,
+            zoomControlsEnabled: false,
+            onTap: (LatLng position) {
+              if (_isSearching) {
+                setState(() {
+                  _isSearching = false;
+                });
+              }
+              _hideKeyboard(); // Hide the keyboard when tapping on the map
+            },
+          ),
+          Positioned(
+            top: MediaQuery.of(context).padding.top + 16, // Move below camera hole
+            left: 16, // Align to the left side of the screen
+            right: 16, // Align to the right side of the screen
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.end, // Align items to the right
+              children: [
+                AnimatedContainer(
+                  duration: Duration(milliseconds: 300),
+                  width: MediaQuery.of(context).size.width - 32, // Full screen width minus padding
+                  height: _isSearching ? 200 : 48, // Adjust the height based on whether user is searching
+                  curve: Curves.easeInOut,
+                  decoration: BoxDecoration(
+                    color: Colors.deepPurple,
+                    borderRadius: BorderRadius.circular(24),
+                  ),
+                  child: Column(
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                              child: TextField(
+                                controller: _searchController,
+                                onChanged: (value) {
+                                  if (value.isNotEmpty) {
+                                    _searchBeaches(value);
+                                  } else {
+                                    setState(() {
+                                      _filteredBeaches.clear();
+                                    });
+                                  }
+                                },
+                                onSubmitted: (value) {
+                                  if (_filteredBeaches.isEmpty) {
+                                    _showBeachNotFoundDialog();
+                                  }
+                                  _hideKeyboard(); // Hide the keyboard after submitting the search
+                                },
+                                style: TextStyle(color: Colors.white),
+                                decoration: InputDecoration(
+                                  hintText: 'Search...',
+                                  hintStyle: TextStyle(color: Colors.white54),
+                                  border: InputBorder.none,
+                                  contentPadding: EdgeInsets.symmetric(horizontal: 16.0),
+                                ),
+                              ),
+                            ),
+                          ),
+                          IconButton(
+                            icon: Icon(Icons.search, color: Colors.white),
+                            onPressed: _onSearchPressed,
+                          ),
+                        ],
+                      ),
+                      if (_isSearching && _filteredBeaches.isNotEmpty)
+                        Expanded(
+                          child: ListView.builder(
+                            itemCount: _filteredBeaches.length,
+                            itemBuilder: (context, index) {
+                              final beach = _filteredBeaches[index];
+                              return ListTile(
+                                title: Text(
+                                  beach.name,
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                                onTap: () {
+                                  _mapController?.animateCamera(
+                                    CameraUpdate.newLatLngZoom(beach.position, 12.0),
+                                  );
+                                  _hideKeyboard(); // Hide the keyboard when selecting a beach
+                                  setState(() {
+                                    _isSearching = false;
+                                  });
+                                },
+                              );
+                            },
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

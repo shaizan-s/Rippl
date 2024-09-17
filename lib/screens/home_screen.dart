@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:beach1/screens/beach_details_screen.dart';
 
-
 class Beach {
   final String name;
   final LatLng position;
@@ -125,121 +124,8 @@ class _BeachMapState extends State<BeachMap> {
     );
   }
 
-
   void _onMapCreated(GoogleMapController controller) {
     _mapController = controller;
-
-    // final String esriLightGrayCanvasStyle = '''
-    // [
-    //   {
-    //     "elementType": "geometry",
-    //     "stylers": [
-    //       {
-    //         "color": "#f5f5f5"
-    //       }
-    //     ]
-    //   },
-    //   {
-    //     "elementType": "labels.icon",
-    //     "stylers": [
-    //       {
-    //         "visibility": "off"
-    //       }
-    //     ]
-    //   },
-    //   {
-    //     "elementType": "labels.text.fill",
-    //     "stylers": [
-    //       {
-    //         "color": "#616161"
-    //       }
-    //     ]
-    //   },
-    //   {
-    //     "elementType": "labels.text.stroke",
-    //     "stylers": [
-    //       {
-    //         "color": "#f5f5f5"
-    //       }
-    //     ]
-    //   },
-    //   {
-    //     "featureType": "administrative.land_parcel",
-    //     "elementType": "labels",
-    //     "stylers": [
-    //       {
-    //         "visibility": "off"
-    //       }
-    //     ]
-    //   },
-    //   {
-    //     "featureType": "poi",
-    //     "elementType": "labels",
-    //     "stylers": [
-    //       {
-    //         "visibility": "off"
-    //       }
-    //     ]
-    //   },
-    //   {
-    //     "featureType": "road",
-    //     "elementType": "geometry",
-    //     "stylers": [
-    //       {
-    //         "color": "#ffffff"
-    //       }
-    //     ]
-    //   },
-    //   {
-    //     "featureType": "road.arterial",
-    //     "elementType": "labels",
-    //     "stylers": [
-    //       {
-    //         "visibility": "off"
-    //       }
-    //     ]
-    //   },
-    //   {
-    //     "featureType": "road.highway",
-    //     "elementType": "geometry",
-    //     "stylers": [
-    //       {
-    //         "color": "#dadada"
-    //       }
-    //     ]
-    //   },
-    //   {
-    //     "featureType": "road.highway",
-    //     "elementType": "labels",
-    //     "stylers": [
-    //       {
-    //         "visibility": "off"
-    //       }
-    //     ]
-    //   },
-    //   {
-    //     "featureType": "transit",
-    //     "elementType": "labels",
-    //     "stylers": [
-    //       {
-    //         "visibility": "off"
-    //       }
-    //     ]
-    //   },
-    //   {
-    //     "featureType": "water",
-    //     "elementType": "geometry",
-    //     "stylers": [
-    //       {
-    //         "color": "#c9c9c9"
-    //       }
-    //     ]
-    //   }
-    // ]
-    // ''';
-    //
-    // _mapController?.setMapStyle(esriLightGrayCanvasStyle);
-
     _mapController?.animateCamera(
       CameraUpdate.newLatLngBounds(_indiaBounds, 10),
     );
@@ -291,12 +177,34 @@ class _BeachMapState extends State<BeachMap> {
   }
 
   void _showMenuOption(String option) {
+    Color dialogBackgroundColor;
+
+    switch (option) {
+      case 'Feedback':
+        dialogBackgroundColor = Colors.deepPurple[200]!;
+        break;
+      case 'Alerts':
+        dialogBackgroundColor = Colors.deepPurple[200]!;
+        break;
+      case 'Recommendations':
+        dialogBackgroundColor = Colors.deepPurple[200]!;
+        break;
+      case 'Favorites':
+        dialogBackgroundColor = Colors.deepPurple[200]!;
+        break;
+      default:
+        dialogBackgroundColor = Colors.white;
+    }
+
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
+          backgroundColor: dialogBackgroundColor,
           title: Text(option),
-          content: option == 'Feedback'
+          content: option == 'Alerts'
+              ? Text('Here are the current alerts...')
+              : option == 'Feedback'
               ? Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -314,11 +222,7 @@ class _BeachMapState extends State<BeachMap> {
               ),
             ],
           )
-              : option == 'Alerts'
-              ? Text('Here are the current alerts...')
-              : option == 'Recommendations'
-              ? Text('Recommended beaches will be displayed here.')
-              : Text('Your favorite beaches will be listed here.'),
+              : Text('Other content based on the option selected.'),
           actions: [
             TextButton(
               child: Text('Close'),
@@ -366,7 +270,12 @@ class _BeachMapState extends State<BeachMap> {
                 decoration: InputDecoration(
                   hintText: 'Search for beaches...',
                   prefixIcon: Icon(Icons.search),
-                  border: OutlineInputBorder(),
+                  filled: true,
+                  fillColor: Colors.deepPurple[200],
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8.0),
+                    borderSide: BorderSide.none,
+                  ),
                   suffixIcon: IconButton(
                     icon: Icon(Icons.close),
                     onPressed: () {
@@ -396,7 +305,12 @@ class _BeachMapState extends State<BeachMap> {
                 SizedBox(height: 16),
                 FloatingActionButton(
                   onPressed: () => _showMenuOption('Feedback'),
-                  child: Icon(Icons.feedback),
+                  child: Icon(Icons.chat_bubble_sharp),
+                ),
+                SizedBox(height: 16),
+                FloatingActionButton(
+                  onPressed: () => _showMenuOption('Alerts'),
+                  child: Icon(Icons.warning),
                 ),
                 SizedBox(height: 16),
                 FloatingActionButton(
@@ -407,11 +321,6 @@ class _BeachMapState extends State<BeachMap> {
                 FloatingActionButton(
                   onPressed: () => _showMenuOption('Favorites'),
                   child: Icon(Icons.favorite),
-                ),
-                SizedBox(height: 16),
-                FloatingActionButton(
-                  onPressed: () => _showMenuOption('Alerts'),
-                  child: Icon(Icons.warning),
                 ),
               ],
             ),

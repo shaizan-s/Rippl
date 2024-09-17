@@ -130,51 +130,111 @@ class _BeachMapState extends State<BeachMap> {
       CameraUpdate.newLatLngBounds(_indiaBounds, 10),
     );
   }
+  void _fitBeachInView(Beach beach) {
+    final padding = 50.0; // Padding around the bounds
+    final LatLngBounds bounds = LatLngBounds(
+      southwest: LatLng(beach.position.latitude - 0.01, beach.position.longitude - 0.01),
+      northeast: LatLng(beach.position.latitude + 0.01, beach.position.longitude + 0.01),
+    );
 
+    _mapController?.animateCamera(
+      CameraUpdate.newLatLngBounds(bounds, padding),
+    );
+  }
   void _onSearchPressed() {
     setState(() {
       _isSearching = !_isSearching;
       if (_isSearching) {
         _searchFocusNode.requestFocus(); // Request focus to keep the keyboard open
+      } else {
+        _filteredBeaches.clear(); // Clear filtered beaches when not searching
       }
     });
   }
-
   void _searchBeaches(String query) {
     final lowerCaseQuery = query.toLowerCase();
     setState(() {
       _filteredBeaches = beaches.where((beach) {
         return beach.name.toLowerCase().contains(lowerCaseQuery);
       }).toList();
-      if (_filteredBeaches.isEmpty) {
-        _showBeachNotFoundDialog();
-      }
+      // No need to show the "No Results Found" dialog
     });
   }
 
-  void _showBeachNotFoundDialog() {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text('No Results Found'),
-          content: Text('No beaches match the search query.'),
-          actions: [
-            TextButton(
-              child: Text('OK'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
 
   void _hideKeyboard() {
     FocusScope.of(context).unfocus(); // Hide the keyboard
   }
+  // Build search bar
+// Updated search bar code with animation
+// Updated search bar code with expanded background
+// Updated search bar code to show dropdown only when selected
+  Widget _buildSearchBar() {
+    return Positioned(
+      top: 40,
+      left: 16,
+      right: 16,
+      child: AnimatedContainer(
+        duration: Duration(milliseconds: 300),
+        height: _searchFocusNode.hasFocus ? MediaQuery.of(context).size.height / 2 : 56, // Animated height
+        decoration: BoxDecoration(
+          color: Colors.deepPurple[200], // Background color for search bar and dropdown
+          borderRadius: BorderRadius.circular(8.0),
+        ),
+        child: Column(
+          children: [
+            TextField(
+              controller: _searchController,
+              focusNode: _searchFocusNode,
+              decoration: InputDecoration(
+                hintText: 'Search for beaches...',
+                prefixIcon: Icon(Icons.search),
+                filled: false, // Set to false to allow background color of container
+                border: InputBorder.none, // Remove the border
+                suffixIcon: IconButton(
+                  icon: Icon(Icons.close),
+                  onPressed: () {
+                    setState(() {
+                      _searchController.clear();
+                      _filteredBeaches.clear();
+                      _searchFocusNode.unfocus(); // Remove focus when cleared
+                    });
+                  },
+                ),
+              ),
+              onChanged: _searchBeaches,
+            ),
+            if (_searchFocusNode.hasFocus && _filteredBeaches.isNotEmpty) ...[
+              Expanded(
+                child: ListView.builder(
+                  padding: EdgeInsets.zero, // Remove default padding
+                  itemCount: _filteredBeaches.length,
+                  itemBuilder: (context, index) {
+                    final beach = _filteredBeaches[index];
+                    return ListTile(
+                      title: Text(beach.name),
+                      subtitle: Text(beach.snippet),
+                      onTap: () {
+                        _fitBeachInView(beach);
+                        setState(() {
+                          _isSearching = false;
+                          _filteredBeaches.clear();
+                        });
+                        _hideKeyboard();
+                      },
+                    );
+                  },
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+
+
 
   void _showMenuOption(String option) {
     Color dialogBackgroundColor;
@@ -259,39 +319,7 @@ class _BeachMapState extends State<BeachMap> {
               _hideKeyboard(); // Hide the keyboard when tapping outside
             },
           ),
-          if (_isSearching) ...[
-            Positioned(
-              top: 40,
-              left: 16,
-              right: 16,
-              child: TextField(
-                controller: _searchController,
-                focusNode: _searchFocusNode,
-                decoration: InputDecoration(
-                  hintText: 'Search for beaches...',
-                  prefixIcon: Icon(Icons.search),
-                  filled: true,
-                  fillColor: Colors.deepPurple[200],
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8.0),
-                    borderSide: BorderSide.none,
-                  ),
-                  suffixIcon: IconButton(
-                    icon: Icon(Icons.close),
-                    onPressed: () {
-                      setState(() {
-                        _searchController.clear();
-                        _filteredBeaches.clear();
-                        _isSearching = false;
-                      });
-                      _hideKeyboard(); // Hide the keyboard
-                    },
-                  ),
-                ),
-                onChanged: _searchBeaches,
-              ),
-            ),
-          ],
+          _buildSearchBar(),
           Positioned(
             bottom: 16,
             right: 16,
@@ -329,4 +357,5 @@ class _BeachMapState extends State<BeachMap> {
       ),
     );
   }
+
 }

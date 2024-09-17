@@ -86,7 +86,7 @@ class _BeachMapState extends State<BeachMap> {
             points: polygonPoints,
             strokeColor: Colors.black,
             strokeWidth: 2,
-            fillColor: color.withOpacity(0.3),
+            fillColor: color.withOpacity(0.7),
           ),
         );
       }
@@ -129,116 +129,116 @@ class _BeachMapState extends State<BeachMap> {
   void _onMapCreated(GoogleMapController controller) {
     _mapController = controller;
 
-    final String esriLightGrayCanvasStyle = '''
-    [
-      {
-        "elementType": "geometry",
-        "stylers": [
-          {
-            "color": "#f5f5f5"
-          }
-        ]
-      },
-      {
-        "elementType": "labels.icon",
-        "stylers": [
-          {
-            "visibility": "off"
-          }
-        ]
-      },
-      {
-        "elementType": "labels.text.fill",
-        "stylers": [
-          {
-            "color": "#616161"
-          }
-        ]
-      },
-      {
-        "elementType": "labels.text.stroke",
-        "stylers": [
-          {
-            "color": "#f5f5f5"
-          }
-        ]
-      },
-      {
-        "featureType": "administrative.land_parcel",
-        "elementType": "labels",
-        "stylers": [
-          {
-            "visibility": "off"
-          }
-        ]
-      },
-      {
-        "featureType": "poi",
-        "elementType": "labels",
-        "stylers": [
-          {
-            "visibility": "off"
-          }
-        ]
-      },
-      {
-        "featureType": "road",
-        "elementType": "geometry",
-        "stylers": [
-          {
-            "color": "#ffffff"
-          }
-        ]
-      },
-      {
-        "featureType": "road.arterial",
-        "elementType": "labels",
-        "stylers": [
-          {
-            "visibility": "off"
-          }
-        ]
-      },
-      {
-        "featureType": "road.highway",
-        "elementType": "geometry",
-        "stylers": [
-          {
-            "color": "#dadada"
-          }
-        ]
-      },
-      {
-        "featureType": "road.highway",
-        "elementType": "labels",
-        "stylers": [
-          {
-            "visibility": "off"
-          }
-        ]
-      },
-      {
-        "featureType": "transit",
-        "elementType": "labels",
-        "stylers": [
-          {
-            "visibility": "off"
-          }
-        ]
-      },
-      {
-        "featureType": "water",
-        "elementType": "geometry",
-        "stylers": [
-          {
-            "color": "#c9c9c9"
-          }
-        ]
-      }
-    ]
-    ''';
-
-    _mapController?.setMapStyle(esriLightGrayCanvasStyle);
+    // final String esriLightGrayCanvasStyle = '''
+    // [
+    //   {
+    //     "elementType": "geometry",
+    //     "stylers": [
+    //       {
+    //         "color": "#f5f5f5"
+    //       }
+    //     ]
+    //   },
+    //   {
+    //     "elementType": "labels.icon",
+    //     "stylers": [
+    //       {
+    //         "visibility": "off"
+    //       }
+    //     ]
+    //   },
+    //   {
+    //     "elementType": "labels.text.fill",
+    //     "stylers": [
+    //       {
+    //         "color": "#616161"
+    //       }
+    //     ]
+    //   },
+    //   {
+    //     "elementType": "labels.text.stroke",
+    //     "stylers": [
+    //       {
+    //         "color": "#f5f5f5"
+    //       }
+    //     ]
+    //   },
+    //   {
+    //     "featureType": "administrative.land_parcel",
+    //     "elementType": "labels",
+    //     "stylers": [
+    //       {
+    //         "visibility": "off"
+    //       }
+    //     ]
+    //   },
+    //   {
+    //     "featureType": "poi",
+    //     "elementType": "labels",
+    //     "stylers": [
+    //       {
+    //         "visibility": "off"
+    //       }
+    //     ]
+    //   },
+    //   {
+    //     "featureType": "road",
+    //     "elementType": "geometry",
+    //     "stylers": [
+    //       {
+    //         "color": "#ffffff"
+    //       }
+    //     ]
+    //   },
+    //   {
+    //     "featureType": "road.arterial",
+    //     "elementType": "labels",
+    //     "stylers": [
+    //       {
+    //         "visibility": "off"
+    //       }
+    //     ]
+    //   },
+    //   {
+    //     "featureType": "road.highway",
+    //     "elementType": "geometry",
+    //     "stylers": [
+    //       {
+    //         "color": "#dadada"
+    //       }
+    //     ]
+    //   },
+    //   {
+    //     "featureType": "road.highway",
+    //     "elementType": "labels",
+    //     "stylers": [
+    //       {
+    //         "visibility": "off"
+    //       }
+    //     ]
+    //   },
+    //   {
+    //     "featureType": "transit",
+    //     "elementType": "labels",
+    //     "stylers": [
+    //       {
+    //         "visibility": "off"
+    //       }
+    //     ]
+    //   },
+    //   {
+    //     "featureType": "water",
+    //     "elementType": "geometry",
+    //     "stylers": [
+    //       {
+    //         "color": "#c9c9c9"
+    //       }
+    //     ]
+    //   }
+    // ]
+    // ''';
+    //
+    // _mapController?.setMapStyle(esriLightGrayCanvasStyle);
 
     _mapController?.animateCamera(
       CameraUpdate.newLatLngBounds(_indiaBounds, 10),
@@ -401,7 +401,7 @@ class _BeachMapState extends State<BeachMap> {
                 SizedBox(height: 16),
                 FloatingActionButton(
                   onPressed: () => _showMenuOption('Recommendations'),
-                  child: Icon(Icons.star),
+                  child: Icon(Icons.lightbulb),
                 ),
                 SizedBox(height: 16),
                 FloatingActionButton(

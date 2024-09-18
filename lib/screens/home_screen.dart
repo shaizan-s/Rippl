@@ -32,14 +32,30 @@ class _BeachMapState extends State<BeachMap> {
   bool _isSearching = false;
   List<Beach> _filteredBeaches = [];
 
-  // List of beaches
   final List<Beach> beaches = [
     Beach(name: 'Juhu Beach', position: LatLng(19.0896, 72.8347), snippet: 'Mumbai, Maharashtra'),
     Beach(name: 'Marina Beach', position: LatLng(13.0481, 80.2714), snippet: 'Chennai, Tamil Nadu'),
     Beach(name: 'Goa Beach', position: LatLng(15.2993, 74.1240), snippet: 'Goa'),
     Beach(name: 'Kovalam Beach', position: LatLng(8.4000, 76.9960), snippet: 'Kerala'),
-    // Add more beaches as needed
+    Beach(name: 'Radhanagar Beach', position: LatLng(11.9835, 92.9876), snippet: 'Havelock Island, Andaman and Nicobar Islands'),
+    Beach(name: 'Baga Beach', position: LatLng(15.5527, 73.7517), snippet: 'North Goa, Goa'),
+    Beach(name: 'Varkala Beach', position: LatLng(8.7379, 76.6984), snippet: 'Thiruvananthapuram, Kerala'),
+    Beach(name: 'Palolem Beach', position: LatLng(15.0090, 74.0233), snippet: 'South Goa, Goa'),
+    Beach(name: 'Tarkarli Beach', position: LatLng(16.0370, 73.4673), snippet: 'Sindhudurg, Maharashtra'),
+    Beach(name: 'Gokarna Beach', position: LatLng(14.5500, 74.3180), snippet: 'Uttara Kannada, Karnataka'),
+    Beach(name: 'Bheemunipatnam Beach', position: LatLng(17.8901, 83.4473), snippet: 'Visakhapatnam, Andhra Pradesh'),
+    Beach(name: 'Puri Beach', position: LatLng(19.7980, 85.8245), snippet: 'Puri, Odisha'),
+    Beach(name: 'Dhanushkodi Beach', position: LatLng(9.1670, 79.4294), snippet: 'Rameswaram, Tamil Nadu'),
+    Beach(name: 'Mandarmani Beach', position: LatLng(21.6686, 87.7071), snippet: 'East Midnapore, West Bengal'),
+    Beach(name: 'Alappuzha Beach', position: LatLng(9.4981, 76.3388), snippet: 'Alappuzha, Kerala'),
+    Beach(name: 'Elephant Beach', position: LatLng(12.0033, 93.0001), snippet: 'Havelock Island, Andaman and Nicobar Islands'),
+    Beach(name: 'Diu Beach', position: LatLng(20.7146, 70.9874), snippet: 'Diu, Daman and Diu'),
+    Beach(name: 'Rishikonda Beach', position: LatLng(17.7829, 83.3842), snippet: 'Visakhapatnam, Andhra Pradesh'),
+    Beach(name: 'Auroville Beach', position: LatLng(12.0140, 79.8561), snippet: 'Pondicherry, Tamil Nadu'),
+    Beach(name: 'Murud Beach', position: LatLng(18.3217, 72.9650), snippet: 'Raigad, Maharashtra'),
+    Beach(name: 'Kapu Beach', position: LatLng(13.2313, 74.7353), snippet: 'Udupi, Karnataka'),
   ];
+
 
   @override
   void initState() {
@@ -93,7 +109,7 @@ class _BeachMapState extends State<BeachMap> {
   }
 
   List<LatLng> _generatePolygonPoints(LatLng center) {
-    const double offset = 1.0;
+    const double offset = 0.2;
     return [
       LatLng(center.latitude + offset, center.longitude - offset),
       LatLng(center.latitude + offset, center.longitude + offset),
@@ -130,8 +146,9 @@ class _BeachMapState extends State<BeachMap> {
       CameraUpdate.newLatLngBounds(_indiaBounds, 10),
     );
   }
+
   void _fitBeachInView(Beach beach) {
-    final padding = 50.0; // Padding around the bounds
+    final padding = 50.0;
     final LatLngBounds bounds = LatLngBounds(
       southwest: LatLng(beach.position.latitude - 0.01, beach.position.longitude - 0.01),
       northeast: LatLng(beach.position.latitude + 0.01, beach.position.longitude + 0.01),
@@ -141,34 +158,31 @@ class _BeachMapState extends State<BeachMap> {
       CameraUpdate.newLatLngBounds(bounds, padding),
     );
   }
+
   void _onSearchPressed() {
     setState(() {
       _isSearching = !_isSearching;
       if (_isSearching) {
-        _searchFocusNode.requestFocus(); // Request focus to keep the keyboard open
+        _searchFocusNode.requestFocus();
       } else {
-        _filteredBeaches.clear(); // Clear filtered beaches when not searching
+        _filteredBeaches.clear();
       }
     });
   }
+
   void _searchBeaches(String query) {
     final lowerCaseQuery = query.toLowerCase();
     setState(() {
       _filteredBeaches = beaches.where((beach) {
         return beach.name.toLowerCase().contains(lowerCaseQuery);
       }).toList();
-      // No need to show the "No Results Found" dialog
     });
   }
 
-
   void _hideKeyboard() {
-    FocusScope.of(context).unfocus(); // Hide the keyboard
+    FocusScope.of(context).unfocus();
   }
-  // Build search bar
-// Updated search bar code with animation
-// Updated search bar code with expanded background
-// Updated search bar code to show dropdown only when selected
+
   Widget _buildSearchBar() {
     return Positioned(
       top: 40,
@@ -176,10 +190,10 @@ class _BeachMapState extends State<BeachMap> {
       right: 16,
       child: AnimatedContainer(
         duration: Duration(milliseconds: 300),
-        height: _searchFocusNode.hasFocus ? MediaQuery.of(context).size.height / 2 : 56, // Animated height
+        height: _searchFocusNode.hasFocus ? MediaQuery.of(context).size.height / 2 : 56,
         decoration: BoxDecoration(
-          color: Colors.deepPurple[200], // Background color for search bar and dropdown
-          borderRadius: BorderRadius.circular(8.0),
+          color: Colors.deepPurple[200],
+          borderRadius: BorderRadius.circular(50.0),
         ),
         child: Column(
           children: [
@@ -189,25 +203,23 @@ class _BeachMapState extends State<BeachMap> {
               decoration: InputDecoration(
                 hintText: 'Search for beaches...',
                 prefixIcon: Icon(Icons.search),
-                filled: false, // Set to false to allow background color of container
-                border: InputBorder.none, // Remove the border
+                border: InputBorder.none,
                 suffixIcon: IconButton(
                   icon: Icon(Icons.close),
                   onPressed: () {
                     setState(() {
                       _searchController.clear();
                       _filteredBeaches.clear();
-                      _searchFocusNode.unfocus(); // Remove focus when cleared
+                      _searchFocusNode.unfocus();
                     });
                   },
                 ),
               ),
               onChanged: _searchBeaches,
             ),
-            if (_searchFocusNode.hasFocus && _filteredBeaches.isNotEmpty) ...[
+            if (_searchFocusNode.hasFocus && _filteredBeaches.isNotEmpty)
               Expanded(
                 child: ListView.builder(
-                  padding: EdgeInsets.zero, // Remove default padding
                   itemCount: _filteredBeaches.length,
                   itemBuilder: (context, index) {
                     final beach = _filteredBeaches[index];
@@ -226,15 +238,11 @@ class _BeachMapState extends State<BeachMap> {
                   },
                 ),
               ),
-            ],
           ],
         ),
       ),
     );
   }
-
-
-
 
   void _showMenuOption(String option) {
     Color dialogBackgroundColor;
@@ -282,6 +290,10 @@ class _BeachMapState extends State<BeachMap> {
               ),
             ],
           )
+              : option == 'Favorites'
+              ? Text('Here your favourite beaches will appear')
+              : option == 'Recommendations'
+              ? Text('Here your recommendations will occur')
               : Text('Other content based on the option selected.'),
           actions: [
             TextButton(
@@ -302,53 +314,50 @@ class _BeachMapState extends State<BeachMap> {
       body: Stack(
         children: [
           GoogleMap(
-            onMapCreated: _onMapCreated,
             initialCameraPosition: CameraPosition(
               target: _initialPosition,
               zoom: 5.0,
             ),
             markers: _markers,
             polygons: _polygons,
-            zoomControlsEnabled: false,
-            onTap: (LatLng position) {
-              if (_isSearching) {
-                setState(() {
-                  _isSearching = false;
-                });
-              }
-              _hideKeyboard(); // Hide the keyboard when tapping outside
-            },
+            onMapCreated: _onMapCreated,
           ),
           _buildSearchBar(),
           Positioned(
-            bottom: 16,
-            right: 16,
+            bottom: 10,
+            right: 10,
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 FloatingActionButton(
-                  onPressed: _onSearchPressed,
-                  child: Icon(_isSearching ? Icons.close : Icons.search),
-                ),
-                SizedBox(height: 16),
-                FloatingActionButton(
-                  onPressed: () => _showMenuOption('Feedback'),
-                  child: Icon(Icons.chat_bubble_sharp),
-                ),
-                SizedBox(height: 16),
-                FloatingActionButton(
-                  onPressed: () => _showMenuOption('Alerts'),
+                  onPressed: () {
+                    _showMenuOption('Alerts');
+                  },
+                  backgroundColor: Colors.deepPurple[200],
                   child: Icon(Icons.warning),
                 ),
-                SizedBox(height: 16),
+                SizedBox(height: 10),
                 FloatingActionButton(
-                  onPressed: () => _showMenuOption('Recommendations'),
+                  onPressed: () {
+                    _showMenuOption('Recommendations');
+                  },
+                  backgroundColor: Colors.deepPurple[200],
                   child: Icon(Icons.lightbulb),
                 ),
-                SizedBox(height: 16),
+                SizedBox(height: 10),
                 FloatingActionButton(
-                  onPressed: () => _showMenuOption('Favorites'),
+                  onPressed: () {
+                    _showMenuOption('Favorites');
+                  },
+                  backgroundColor: Colors.deepPurple[200],
                   child: Icon(Icons.favorite),
+                ),
+                SizedBox(height: 10),
+                FloatingActionButton(
+                  onPressed: () {
+                    _showMenuOption('Feedback');
+                  },
+                  backgroundColor: Colors.deepPurple[200],
+                  child: Icon(Icons.feedback_rounded),
                 ),
               ],
             ),
@@ -357,5 +366,4 @@ class _BeachMapState extends State<BeachMap> {
       ),
     );
   }
-
 }

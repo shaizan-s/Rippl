@@ -308,6 +308,7 @@ class _BeachMapState extends State<BeachMap> {
     );
   }
 
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -323,6 +324,78 @@ class _BeachMapState extends State<BeachMap> {
             onMapCreated: _onMapCreated,
           ),
           _buildSearchBar(),
+
+          // Add the index with updated colors and labels here, above the Google logo
+          Positioned(
+            bottom: 40, // Set it above the Google logo
+            left: 10, // You can adjust the left/right position as needed
+            child: Container(
+              padding: EdgeInsets.all(8.0),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(10),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black12,
+                    blurRadius: 5.0,
+                  ),
+                ],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Green (Safe)
+                  Row(
+                    children: [
+                      Container(
+                        width: 20,
+                        height: 20,
+                        color: Colors.green, // Green color for 'Safe'
+                      ),
+                      SizedBox(width: 10),
+                      Text(
+                        'Safe',
+                        style: TextStyle(fontSize: 14),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 5),
+                  // Yellow (Cautious)
+                  Row(
+                    children: [
+                      Container(
+                        width: 20,
+                        height: 20,
+                        color: Colors.yellow, // Yellow color for 'Cautious'
+                      ),
+                      SizedBox(width: 10),
+                      Text(
+                        'Cautious',
+                        style: TextStyle(fontSize: 14),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 5),
+                  // Red (Dangerous)
+                  Row(
+                    children: [
+                      Container(
+                        width: 20,
+                        height: 20,
+                        color: Colors.red, // Red color for 'Dangerous'
+                      ),
+                      SizedBox(width: 10),
+                      Text(
+                        'Dangerous',
+                        style: TextStyle(fontSize: 14),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+
           Positioned(
             bottom: 10,
             right: 10,
@@ -366,4 +439,23 @@ class _BeachMapState extends State<BeachMap> {
       ),
     );
   }
+
+
+
+
 }
+// Helper function to create the index box with color and label
+Widget _buildIndexBox(Color color, String label) {
+  return Row(
+    children: [
+      Container(
+        width: 20,
+        height: 20,
+        color: color,
+      ),
+      SizedBox(width: 5),
+      Text(label, style: TextStyle(fontSize: 16)),
+    ],
+  );
+}
+
